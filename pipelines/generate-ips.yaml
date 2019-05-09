@@ -1,0 +1,22 @@
+start:
+    - generate: 10                      # Generate 10 lines
+
+    # Generate random IP address
+    - read from random:
+        ##  Using numbers from 0 to 255
+        { byte1: 255, byte2: 255, byte3: 255, byte4: 255 }
+    ## Concatenate them with "."
+    - tag: { ip_address: $byte1$.$byte2$.$byte3$.$byte4$ }
+    ## Generate random hour/time/seconds
+    - read from random: { hours: 24, minutes: 60, seconds: 60 }
+    ## Use f'string' to format the numbers with 2 digits
+    - tag: { random_time: "$ f'{hours:02}:{minutes:02}:{seconds:02}' $" }
+
+    # Generate a random string
+    ## Generate a random length for the string (10..30 chars)
+    - read from random: 10..30
+    ## Generate that number of chars
+    - tag as: random_size
+    - generate: $_$
+    - read from random: a..z
+    - queue: $_tag.random_size$
