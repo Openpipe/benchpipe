@@ -1,5 +1,15 @@
 start:
-    - generate: 10                      # Generate 10 lines
+
+    # Read current date first to avoid wasting time in the random data loop
+    - read from clock: { format: "%Y/%m/%d" } # Current date
+    - tag as: date
+
+    - generate: 1000000  # Generate 1 million lines
+
+    ## Generate random hour/time/seconds
+    - read from random: { hours: 24, minutes: 60, seconds: 60 }
+    ## Use f'string' to format the numbers with 2 digits
+    - tag: { time: "$ f'{hours:02}:{minutes:02}:{seconds:02}' $" }
 
     # Generate random IP address
     - read from random:
@@ -7,16 +17,14 @@ start:
         { byte1: 255, byte2: 255, byte3: 255, byte4: 255 }
     ## Concatenate them with "."
     - tag: { ip_address: $byte1$.$byte2$.$byte3$.$byte4$ }
-    ## Generate random hour/time/seconds
-    - read from random: { hours: 24, minutes: 60, seconds: 60 }
-    ## Use f'string' to format the numbers with 2 digits
-    - tag: { random_time: "$ f'{hours:02}:{minutes:02}:{seconds:02}' $" }
 
     # Generate a random string
-    ## Generate a random length for the string (10..30 chars)
-    - read from random: 10..30
-    ## Generate that number of chars
-    - tag as: random_size
-    - generate: $_$
-    - read from random: a..z
-    - queue: $_tag.random_size$
+    - read from random string:
+        charset: a..z   # with chars from 'a' to 'z'
+        length: 10..30  # And lenght between 10 and 30
+    - tag as: url
+
+    # Generate a random number for time taken
+    - read from random: 10..4000
+    - tag as: taken
+    - print: $_tag$
